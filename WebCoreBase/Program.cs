@@ -23,4 +23,5 @@ namespace WebCoreBase
                     webBuilder.UseStartup<Startup>();
                 });
     }
+    
 }
