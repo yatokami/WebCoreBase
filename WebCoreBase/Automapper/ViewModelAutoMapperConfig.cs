@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using EFCore;
 using EFCore.Models;
 using System;
 using System.Collections.Generic;
@@ -12,10 +13,13 @@ namespace WebCoreBase.Automapper
     {
         public ViewModelAutoMapperConfig()
         {
-            CreateMap<UsersView, User>().ForMember(dto => dto.Gender, source =>
+            CreateMap<UserViewPost, User>().ForMember(dto => dto.Gender, source =>
             {
                 source.MapFrom(m => m.Gender == "男" ? 1 : 0);
-            }).AfterMap((dto, ent) => ent.Created = DateTime.Now);
+            })
+            .AfterMap((dto, ent) => ent.Created = DateTime.Now)
+            .AfterMap((dto, ent) => ent.Password = Untils.MD5(ent.Password));
+
             CreateMap<User, UsersView>().ForMember(dto => dto.Gender, source =>
             {
                 source.MapFrom(m => m.Gender == 1 ? "男" : "女");

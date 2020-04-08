@@ -9,7 +9,8 @@ namespace EFCore.Interfaces
         Task<IEnumerable<User>> GetListAsync();
 
         Task<User> GetInfoAsync(int id);
-
-        Task<bool> SaveAsync(User user);
+        void Save(User user);
+        void Delete(User user);
+        Task<bool> SaveChangesAsync();
     }
 }

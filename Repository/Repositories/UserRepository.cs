@@ -22,13 +22,22 @@ namespace Repository.Repositories
 
         public async Task<User> GetInfoAsync(int id)
         {
-            return await _webContext.User.FirstOrDefaultAsync(u => u.Id == id);
+            return await _webContext.User.SingleAsync(u => u.Id == id);
         }
 
-        public async Task<bool> SaveAsync(User user)
+        public void Save(User user)
         {
             _webContext.User.Add(user);
-            return await _webContext.SaveChangesAsync() == 1;
+        }
+
+        public void Delete(User user)
+        {
+            _webContext.User.Remove(user);
+        }
+
+        public async Task<bool> SaveChangesAsync()
+        {
+            return await _webContext.SaveChangesAsync() > 0;
         }
     }
 }

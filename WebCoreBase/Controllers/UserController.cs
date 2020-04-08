@@ -44,7 +44,7 @@ namespace WebCoreBase.Controllers
 
         // POST: api/User
         [HttpPost]
-        public async Task<ActionResult> Post([FromBody] UsersView users)
+        public async Task<ActionResult> Post([FromBody] UserViewPost users)
         {
             if(users == null)
             {
@@ -52,23 +52,51 @@ namespace WebCoreBase.Controllers
             }
 
             var UserModel = _mapper.Map<User>(users);
-            if (!await _userRepository.SaveAsync(UserModel))
+            _userRepository.Save(UserModel);
+            if (!await _userRepository.SaveChangesAsync())
             {
                 return StatusCode(500, "Save Error");
             };
-            return Ok();
+            var user = _mapper.Map<UsersView>(UserModel);
+            return CreatedAtRoute("Get", new { id = user.Id }, user);
         }
 
         // PUT: api/User/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public async Task<ActionResult> Put(int id, [FromBody] UserViewPost users)
         {
+            if (users == null || id == 0)
+            {
+                return BadRequest();
+            }
+
+            var userInfo = await _userRepository.GetInfoAsync(id);
+
+            var UserModel = _mapper.Map(users, userInfo);
+            if (!await _userRepository.SaveChangesAsync())
+            {
+                return StatusCode(500, "Save Error");
+            };
+            var user = _mapper.Map<UsersView>(UserModel);
+            return CreatedAtRoute("Get", new { id = user.Id }, user);
         }
 
         // DELETE: api/ApiWithActions/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<ActionResult> Delete(int id)
         {
+            var userInfo = await _userRepository.GetInfoAsync(id);
+            if (userInfo == null)
+            {
+                return BadRequest();
+            }
+            _userRepository.Delete(userInfo);
+            if (!await _userRepository.SaveChangesAsync())
+            {
+                return StatusCode(500, "Save Error");
+            };
+
+            return NoContent();
         }
     }
 }
