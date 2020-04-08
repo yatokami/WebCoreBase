@@ -1,4 +1,6 @@
-﻿using EFCore.Interfaces;
+﻿using AutoMapper;
+using EFCore.Interfaces;
+using EFCore.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -11,30 +13,50 @@ namespace WebCoreBase.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserRepository _userRepository;
-        public UserController(IUserRepository userRepository)
+        private readonly IMapper _mapper;
+        public UserController(IUserRepository userRepository, IMapper mapper)
         {
             _userRepository = userRepository;
+            _mapper = mapper;
         }
         // GET: api/User
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Users>>> Get()
+        public async Task<ActionResult<IEnumerable<UsersView>>> Get()
         {
-
             var user =  await _userRepository.GetListAsync();
-            return Ok(user);
+            var users = _mapper.Map<List<UsersView>>(user);
+            return Ok(users);
         }
 
         // GET: api/User/5
         [HttpGet("{id}", Name = "Get")]
-        public string Get(int id)
+        public async Task<ActionResult<UsersView>> Get(int id)
         {
-            return "value";
+            var user = await _userRepository.GetInfoAsync(id);
+            if(user == null)
+            {
+                return Ok();
+            }
+
+            var users = _mapper.Map<UsersView>(user);
+            return Ok(users);
         }
 
         // POST: api/User
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task<ActionResult> Post([FromBody] UsersView users)
         {
+            if(users == null)
+            {
+                return BadRequest();
+            }
+
+            var UserModel = _mapper.Map<User>(users);
+            if (!await _userRepository.SaveAsync(UserModel))
+            {
+                return StatusCode(500, "Save Error");
+            };
+            return Ok();
         }
 
         // PUT: api/User/5

@@ -1,3 +1,4 @@
+using AutoMapper;
 using EFCore.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -7,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Repository;
 using Repository.Repositories;
+using WebCoreBase.Automapper;
 
 namespace WebCoreBase
 {
@@ -25,8 +27,9 @@ namespace WebCoreBase
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddDbContext<WebContext>(options =>
             {
-                options.UseMySql("server=localhost;userid=root;pwd=root;port=3306;database=web;sslmode=none");
+                options.UseMySql(Configuration.GetConnectionString("MysqlDatabase").ToString());
             });
+            services.AddAutoMapper(typeof(ViewModelAutoMapperConfig));
             services.AddControllers();
         }
 
